@@ -1,6 +1,7 @@
 import pygame
 import maze_generator
 
+# *** Gui Runner Module ***
 MAZE_SCALING_FACTOR = 0.4
 WINDOW_SIZE = (1200, 700)
 MAZE_WINDOW_SIZE = (WINDOW_SIZE[0] * MAZE_SCALING_FACTOR, WINDOW_SIZE[1] * MAZE_SCALING_FACTOR)
@@ -20,11 +21,8 @@ class Button:
     def create(self):
         pygame.Rect(self.x, self.y, self.length, self.width)
     
-    def hover_action(self):
-        if pygame.Rect.collidepoint(self, pygame.mouse.get_pos()):
-            self.color = self.hover_color
-        else:
-            self.color = self.color
+    def click_action():
+        pass
 
 def gui_setup():
     '''
