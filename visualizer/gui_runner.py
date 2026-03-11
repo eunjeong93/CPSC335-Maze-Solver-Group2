@@ -5,24 +5,39 @@ import maze_generator
 MAZE_SCALING_FACTOR = 0.4
 WINDOW_SIZE = (1200, 700)
 MAZE_WINDOW_SIZE = (WINDOW_SIZE[0] * MAZE_SCALING_FACTOR, WINDOW_SIZE[1] * MAZE_SCALING_FACTOR)
+time_scale = 1 # Default set at 1, range 0.5 <= a <= 5 for 1/2 speed to 5x speed
 
 class Button:
-    def __init__(self, x, y, length, width, text, color, hover_color, action):
-        self.x = x
-        self.y = y
-        self.length = length
-        self.width = width
-        self.text = text
-        self.color = color
-        self.hover_color = hover_color
-        self.action = action
-        self.create()
+    def __init__(self, rect, label, toggle=False):
+        self.rect   = pygame.Rect(rect)
+        self.label  = label
+        self.toggle = toggle
+        self.active = False
 
-    def create(self):
-        pygame.Rect(self.x, self.y, self.length, self.width)
-    
-    def click_action():
-        pass
+    def draw(self, surface, font):
+        try:
+            hover = self.rect.collidepoint(pygame.mouse.get_pos())
+            if self.active and self.toggle:
+                color = BTN_ACTIVE
+            elif hover:
+                color = BTN_HOVER
+            else:
+                color = BTN_COLOR
+            pygame.draw.rect(surface, color, self.rect, border_radius=6)
+            pygame.draw.rect(surface, (80, 80, 120), self.rect, 1, border_radius=6)
+            txt = font.render(self.label, True, BTN_TEXT)
+            surface.blit(txt, txt.get_rect(center=self.rect.center))
+        except Exception as e:
+            print(f"[Button.draw] Error rendering button '{self.label}': {e}")
+
+    def is_clicked(self, event):
+        try:
+            return (event.type == pygame.MOUSEBUTTONDOWN
+                    and event.button == 1
+                    and self.rect.collidepoint(event.pos))
+        except Exception as e:
+            print(f"[Button.is_clicked] Error: {e}")
+            return False
 
 def gui_setup():
     '''
@@ -125,4 +140,7 @@ def maze_scale(maze):
     '''
 
 if __name__ == '__main__':
-    gui_setup()
+    arr = maze_generator.generate_path(100, 100, (10, 21), (70, 90))
+
+    for coord in arr: print(coord)
+    # gui_setup()
