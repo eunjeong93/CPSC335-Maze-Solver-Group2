@@ -27,9 +27,6 @@ class Maze:
     def __init__(self, main_path):
         pass
 
-
-
-
 def generate_random_maze(size_x, size_y):
     '''
     Generates a random maze of size_x * size_y.
@@ -124,9 +121,7 @@ def generate_path(size_x, size_y, start_pos, end_pos, maze_matrix):
     maze_matrix[end_pos[0]][end_pos[1]] = '.'
 
     # Other initializations
-    path_arr = [] # Store path data in an array of 2-tuples
     current_pos = start_pos # Intialize current position to start (x, y)
-    path_arr.append(current_pos) # Include the start position into the path
     next_positions = []
 
     while current_pos != end_pos:   
@@ -136,27 +131,39 @@ def generate_path(size_x, size_y, start_pos, end_pos, maze_matrix):
         top = (current_pos[0], current_pos[1] + 1)
         bottom = (current_pos[0], current_pos[1] - 1)
 
+        if check_valid_submatrix_in_path(generate_submatrix(maze_matrix, left)) and left[0] > 1: next_positions.append(left)
+
+        if check_valid_submatrix_in_path(generate_submatrix(maze_matrix, right)) and right[0] < size_x: next_positions.append(right)
+
+        if check_valid_submatrix_in_path(generate_submatrix(maze_matrix, top)) and top[1] < size_y: next_positions.append(top)
+
+        if check_valid_submatrix_in_path(generate_submatrix(maze_matrix, bottom)) and bottom[1] > 1: next_positions.append(bottom)
+
         # Check each cell if it already exists in the path array
         # Additionally check for maze bounds
-        if check_valid_submatrix_in_path() and left[0] > 1: next_positions.append(left)
+        # if check_valid_submatrix_in_path() and left[0] > 1: next_positions.append(left)
 
-        if right not in path_arr and right[0] < size_x: next_positions.append(right)
+        # if right not in path_arr and right[0] < size_x: next_positions.append(right)
 
-        if top not in path_arr and top[1] < size_y: next_positions.append(top)
+        # if top not in path_arr and top[1] < size_y: next_positions.append(top)
 
-        if bottom not in path_arr and bottom[1] > 1: next_positions.append(bottom)
+        # if bottom not in path_arr and bottom[1] > 1: next_positions.append(bottom)
 
         if len(next_positions) == 0: break
 
         # Randomly pick between the remaining next positions
         current_pos = random.choice(next_positions)
 
-        path_arr.append(current_pos)
+        maze_matrix[current_pos[0]][current_pos[1]] = '.'
 
         # Clear next positions for the next iteration
         next_positions.clear()
     
-    return path_arr
+    # Set the start and end positions to 'S' and 'E' respectively after path generation
+    maze_matrix[start_pos[0]][start_pos[1]] = 'S'
+    maze_matrix[end_pos[0]][end_pos[1]] = 'E'
+    
+    return maze_matrix
 
 def generate_single_access_path(size_x, size_y, main_path, *single_path):
     '''
@@ -197,10 +204,42 @@ def generate_walls_and_borders(size_x, size_y, main_path, *single_path):
                     to help determine the remaining spaces in the maze.
     :returns: An array of 2-tuples containing the locations of each wall and the border.
     '''
-def generate_submatrix(maze_matrix):
+def generate_submatrix(maze_matrix, center_pos):
     '''
-    Description: 
+    Description: Generates a 3x3 submatrix given a center position. The center position
+    will automatically include a '.' to indicate a path value. Note that if the center
+    position lies on the border of the maze, then a 'X' value will be assigned to it
+    to show that it exceeds the boundaries of the maze.
+
+             0             1             2
+    0 [x - 1, y + 1][x + 0, y + 1][x + 1, y + 1]
+    1 [x - 1, y + 0][x + 0, y + 0][x + 1, y + 0]
+    2 [x - 1, y - 1][x + 0, y - 1][x + 1, y - 1]
+
+    :param maze_matrix: A 2D matrix representing a maze
+    :param center_pos: The center position of the submatrix in (x, y) format
+    :returns: A 3x3 submatrix containing the center position and surrounding maze data
     '''
+    out_bounds = lambda x, y: x < 0 or y < 0 # Lambda function for bounds checking
+
+    submatrix = [['O' for _ in range(3)] for _ in range(3)]
+
+    # Set center point
+    submatrix[1][1] = '.'
+
+    # Populate submatrix
+    for i in range(3):
+        for j in range(3):
+            if i == 1 and j == 1: continue
+
+            x_mod_pos = center_pos[0] - ((1 if i == 0 else -1) if i != 1 else 0)
+            y_mod_pos = center_pos[0] - ((1 if j == 0 else -1) if j != 1 else 0)
+
+            submatrix[i][j] = (maze_matrix[x_mod_pos][y_mod_pos]) if not out_bounds(x_mod_pos, y_mod_pos) else 'X'
+
+    return submatrix
+
+
 def check_valid_submatrix_in_path(matrix):
     '''
     Description: Determines if a 3x3 matrix containing path information
@@ -244,8 +283,8 @@ def export_maze_data_to_text_file(maze):
     :returns: A boolean True if the export was successful; False otherwise
     '''
 if __name__ == '__main__':
-    sizex = 50
-    sizey = 50
+    sizex = 7
+    sizey = 7
     # arr = generate_random_maze(sizex, sizey)
     # path_coverage = (len(arr) / (sizex * sizey)) * 100
 
@@ -264,45 +303,11 @@ if __name__ == '__main__':
     #         else:
     #             print("#", end=" ")
     #     print()
-    arr = generate_maze_matrix(sizex, sizey)
+    matrix = generate_path(sizex, sizey, (1, 1), (6, 6), generate_maze_matrix(sizex, sizey))
 
-    for i in range(len(arr)):
-        for j in range(len(arr[i])):
-            print(arr[i][j], end=" ")
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            print(matrix[i][j], end="")
+
         print()
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

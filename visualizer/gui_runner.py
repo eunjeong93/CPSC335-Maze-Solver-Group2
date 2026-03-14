@@ -5,7 +5,8 @@ import maze_generator
 MAZE_SCALING_FACTOR = 0.4
 WINDOW_SIZE = (1200, 700)
 MAZE_WINDOW_SIZE = (WINDOW_SIZE[0] * MAZE_SCALING_FACTOR, WINDOW_SIZE[1] * MAZE_SCALING_FACTOR)
-time_scale = 1 # Default set at 1, range 0.5 <= a <= 5 for 1/2 speed to 5x speed
+time_scale = 1 # Default set at 1, range 0.5 <= a <= 5 for 1/2 speed to 3x speed
+pygame.init()
 
 class Button:
     def __init__(self, rect, label, toggle=False):
@@ -13,20 +14,21 @@ class Button:
         self.label  = label
         self.toggle = toggle
         self.active = False
+        self.font = pygame.font.SysFont('Arial', 40)
 
-    def draw(self, surface, font):
+    def draw(self, surface, font, text):
         try:
             hover = self.rect.collidepoint(pygame.mouse.get_pos())
             if self.active and self.toggle:
-                color = BTN_ACTIVE
+                color = pygame.Color(255, 0, 0) # Red
             elif hover:
-                color = BTN_HOVER
+                color = pygame.Color(153, 204, 255) # Lighter Blue
             else:
-                color = BTN_COLOR
+                color = pygame.Color(0, 128, 255) # Light Blue
             pygame.draw.rect(surface, color, self.rect, border_radius=6)
             pygame.draw.rect(surface, (80, 80, 120), self.rect, 1, border_radius=6)
-            txt = font.render(self.label, True, BTN_TEXT)
-            surface.blit(txt, txt.get_rect(center=self.rect.center))
+            txt = font.render(text, True, (255, 255, 255))
+            surface.blit(txt, txt.get_rect(text))
         except Exception as e:
             print(f"[Button.draw] Error rendering button '{self.label}': {e}")
 
@@ -55,8 +57,8 @@ def gui_setup():
         
         screen.fill("white")
         # Place maze code between here
-        load_buttons()
-
+        but = load_buttons()
+        but.draw(screen, "Times New Roman", "TEST")
         # and here
         pygame.display.flip()
         clock.tick(60)
@@ -100,6 +102,8 @@ def load_buttons():
             -- Press RUN CONT or RUN DISC to resume.
         RESET
             - Resets the maze solver state.
+        - SPEED +
+            - Sets the speed of the simulation from 0.5X to 5X
 
         *** Data Access ***
         DATA
@@ -116,7 +120,22 @@ def load_buttons():
                 - Run, Maze Size, Algorithm, and Time are exported
                 to a csv file
     '''
-    but = Button(300, 200, 150, 70, "TEST", "green", "red", test_func)
+    button_length = 200
+    button_width = 100
+
+    test_button = Button(pygame.Rect(20, 20, button_length, button_width), "test button", False)
+
+    return test_button
+
+def generate_button(button_name, button_text):
+    '''
+    Description: Generates a button given a button name and text.
+
+    :param button_name: The name of the button object
+    :param button_text: The text that is displayed inside the button
+    :returns: A Button object
+    '''
+
 
 def test_func():
     print("Hello World!")
@@ -129,7 +148,7 @@ def maze_setup(maze_size_x, maze_size_y):
     :param maze_size_x: The length of the x direction of the maze
     :param maze_size_y: The length of the y direction of the maze
     '''
-    new_maze = maze_generator.generate_random_maze(maze_size_x, maze_size_y)
+    
 
 def maze_scale(maze):
     '''
@@ -140,7 +159,7 @@ def maze_scale(maze):
     '''
 
 if __name__ == '__main__':
-    arr = maze_generator.generate_path(100, 100, (10, 21), (70, 90))
+    # arr = maze_generator.generate_path(100, 100, (10, 21), (70, 90))
 
-    for coord in arr: print(coord)
-    # gui_setup()
+    # for coord in arr: print(coord)
+    gui_setup()
