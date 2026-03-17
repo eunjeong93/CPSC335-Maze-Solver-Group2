@@ -1,42 +1,73 @@
+import csv
+from datetime import datetime
+import os
+import time
+# *** Maze Timer Module ***
+
 import time
 
-# *** Maze Timer ***
-start_time_arr = []
-end_time_arr = []
+class MazeTimer:
+    def __init__(self):
+        self.start_time = 0
+        self.accumulated_time = 0
+        self.is_running = False
+        self.is_paused = False
 
-global_start_time = 0
-global_end_time = 0
+    def start(self):
+        self.start_time = time.perf_counter()
+        self.accumulated_time = 0
+        self.is_running = True
+        self.is_paused = False
 
-def time_maze_run(maze_state):
+    def pause(self):
+        if self.is_running and not self.is_paused:
+            # Save the time elapsed so far
+            self.accumulated_time += time.perf_counter() - self.start_time
+            self.is_paused = True
+
+    def resume(self):
+        if self.is_running and self.is_paused:
+            # Reset start_time to "now" to begin counting again
+            self.start_time = time.perf_counter()
+            self.is_paused = False
+
+    def stop(self):
+        if self.is_running:
+            if not self.is_paused:
+                self.accumulated_time += time.perf_counter() - self.start_time
+            self.is_running = False
+            self.is_paused = False
+        return round(self.accumulated_time, 4)
+
+    def get_current(self):
+        if not self.is_running:
+            return round(self.accumulated_time, 2)
+        if self.is_paused:
+            return round(self.accumulated_time, 2)
+        return round(self.accumulated_time + (time.perf_counter() - self.start_time), 2)
+    
+def save_run_data(algo_name, maze_size, time_taken, status="Completed"):
     '''
-    Description: Times a maze run by initializing a global timer.
-    When the maze is paused, this function can be called again
-    to temporarily stop the timer. An incomplete run will be
-    deleted. If this function is called without starting a run,
-    the function call will automatically return without taking
-    any action.
-
-    :param maze_state: The current maze state;
-                    First call maze_state = 1 to start the timer,
-                    Then call maze_state = 0 to end the timer
+    Saves run results to 'maze_results.txt' in a CSV format.
     '''
-    if maze_state == 1:
-        if global_start_time != 0 and global_end_time == 0:
-            start_time_arr.pop()
-            return None
-        # Repeat measurement for more precise measurement
-        for i in range(3):
-            global_start_time += time.perf_counter()
-        
-        global_start_time /= 3
-        start_time_arr.append(global_start_time)
-    elif maze_state == 0:
-        if global_start_time == 0 and global_end_time == 0:
-            return None
-        for i in range(3):
-            global_end_time += time.perf_counter()
+    file_path = "maze_results.txt"
+    file_exists = os.path.isfile(file_path)
+    
+    # Headers for the file
+    header = ["Timestamp", "Algorithm", "Size", "Time(s)", "Status"]
+    
+    # Data row
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    row = [timestamp, algo_name, f"{maze_size[0]}x{maze_size[1]}", time_taken, status]
 
-        global_end_time /= 3
-        end_time_arr.append(global_end_time)
+    try:
+        with open(file_path, mode='a', newline='') as f:
+            writer = csv.writer(f)
+            # Write header only if file is new
+            if not file_exists:
+                writer.writerow(header)
+            writer.writerow(row)
+        print(f"Data saved successfully to {file_path}")
+    except Exception as e:
+        print(f"Error saving data: {e}")
 
-        global_start_time, global_end_time = 0
