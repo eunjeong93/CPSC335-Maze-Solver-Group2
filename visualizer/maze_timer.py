@@ -21,13 +21,11 @@ class MazeTimer:
 
     def pause(self):
         if self.is_running and not self.is_paused:
-            # Save the time elapsed so far
             self.accumulated_time += time.perf_counter() - self.start_time
             self.is_paused = True
 
     def resume(self):
         if self.is_running and self.is_paused:
-            # Reset start_time to "now" to begin counting again
             self.start_time = time.perf_counter()
             self.is_paused = False
 
@@ -39,12 +37,18 @@ class MazeTimer:
             self.is_paused = False
         return round(self.accumulated_time, 4)
 
-    def get_current(self):
-        if not self.is_running:
-            return round(self.accumulated_time, 2)
-        if self.is_paused:
-            return round(self.accumulated_time, 2)
-        return round(self.accumulated_time + (time.perf_counter() - self.start_time), 2)
+    def save_run_data(self, algo_name, maze_size, time_taken, status="Completed"):
+        file_path = "maze_results.txt"
+        file_exists = os.path.isfile(file_path)
+        header = ["Timestamp", "Algorithm", "Size", "Time(s)", "Status"]
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        row = [timestamp, algo_name, f"{maze_size[0]}x{maze_size[1]}", time_taken, status]
+
+        with open(file_path, mode='a', newline='') as f:
+            writer = csv.writer(f)
+            if not file_exists:
+                writer.writerow(header)
+            writer.writerow(row)
     
 def save_run_data(algo_name, maze_size, time_taken, status="Completed"):
     '''

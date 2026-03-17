@@ -1,42 +1,12 @@
 import random
-import time
 import os
 import gui_runner
 
 # *** Maze Generator ***
 # Import this file to generate a random maze.
 
-class Maze:
-    '''
-    Maze class for creating Maze objects
-    that contain maze information for retrieval.
-    
-    Maze data contains:
-        'S' which represents the start position,
-        'E' which represents the end position,
-        '#' which represents a wall,
-        '.' which represents a path
-    
-    Maze data is stored in a three tuple format:
-    (point_type, x_coord, y_coord)
-        point_type: 'S' | 'E' | '#' | '.'
-        x_coord: Integer; 1 <= x <= max_size
-        y_coord: Integer; 1 <= x <= max_size
-    '''
-    def __init__(self, maze_size_x, maze_size_y):
-        self.maze_size_x = maze_size_x
-        self.maze_size_y = maze_size_y
-
-        self.maze_cells = []
-
-    def add_cell(self, cell):
-        self.maze_cells.append(cell)
-
 def generate_random_maze(maze_obj):
-    '''
-    Implementation of Recursive Backtracker for maze generation.
-    '''
-    # 1. Start by setting every cell to a WALL
+    # 1. Start everything as a WALL
     for cell in maze_obj.cells:
         cell.state = gui_runner.States.WALL
 
@@ -47,23 +17,36 @@ def generate_random_maze(maze_obj):
 
     while stack:
         current = stack[-1]
-        neighbors = get_unvisited_neighbors(current, maze_obj.cells, 
-                                            maze_obj.maze_size_x, maze_obj.maze_size_y)
+        neighbors = get_unvisited_walls(current, maze_obj)
 
         if neighbors:
             next_cell = random.choice(neighbors)
-            
-            # Remove the wall between current and next
+            # Pass the cell list and width specifically
             remove_wall(current, next_cell, maze_obj.cells, maze_obj.maze_size_x)
             
-            # Move to next cell
             next_cell.state = gui_runner.States.UNDISCOVERED_PATH
             stack.append(next_cell)
         else:
             stack.pop()
 
-    # Set the bottom-right cell as the END
+    # Final touch: ensure start and end are correct
+    maze_obj.cells[0].state = gui_runner.States.START
     maze_obj.cells[-1].state = gui_runner.States.END
+
+def get_unvisited_walls(cell, maze_obj):
+    neighbors = []
+    x, y = cell.x_coord, cell.y_coord
+    # Jump by 2 to leave a wall in between
+    directions = [(0, -2), (0, 2), (-2, 0), (2, 0)]
+
+    for dx, dy in directions:
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < maze_obj.maze_size_x and 0 <= ny < maze_obj.maze_size_y:
+            target = maze_obj.cells[ny * maze_obj.maze_size_x + nx]
+            # ONLY return it if it's still a WALL (unvisited)
+            if target.state == gui_runner.States.WALL:
+                neighbors.append(target)
+    return neighbors
 
 def get_unvisited_neighbors(cell, grid, maze_size_x, maze_size_y):
     '''
@@ -86,14 +69,26 @@ def get_unvisited_neighbors(cell, grid, maze_size_x, maze_size_y):
     return neighbors
 
 def remove_wall(current, next_cell, grid, maze_size_x):
-    '''
-    Changes the state of the cell between 'current' and 'next_cell' to a path.
-    '''
+    # Standardize x/y to find the midpoint
     wall_x = (current.x_coord + next_cell.x_coord) // 2
     wall_y = (current.y_coord + next_cell.y_coord) // 2
     
-    wall_cell = grid[wall_y * maze_size_x + wall_x]
-    wall_cell.state = gui_runner.States.UNDISCOVERED_PATH # Or a specific PATH state
+    wall_idx = wall_y * maze_size_x + wall_x
+    grid[wall_idx].state = gui_runner.States.UNDISCOVERED_PATH
+
+def apply_maze_data_to_obj(maze_obj, maze_data):
+    # maze_data is the 2D list from your load_maze_from_file
+    for y, row in enumerate(maze_data):
+        for x, char in enumerate(row):
+            target_cell = maze_obj.cells[y * maze_obj.maze_size_x + x]
+            if char == '#': 
+                target_cell.state = gui_runner.States.WALL
+            elif char == 'S': 
+                target_cell.state = gui_runner.States.START
+            elif char == 'E': 
+                target_cell.state = gui_runner.States.END
+            else:
+                target_cell.state = gui_runner.States.UNDISCOVERED_PATH
 
 def load_maze_from_file(file_name):
     '''

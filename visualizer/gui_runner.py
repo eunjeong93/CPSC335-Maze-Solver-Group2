@@ -283,6 +283,20 @@ def gui_setup():
                         final_time = maze_timer.stop()
                         timer.save_run_data("BFS", (x_maze_size, y_maze_size), final_time)
                         active_solvers.remove(solver)
+        
+        if needs_update:
+            var_text_arr = load_variable_text_into_screen()
+            maze_arr = maze_setup(x_maze_size, y_maze_size)
+            
+            # FIX: Point maze_current to the actual object inside the list
+            if algo_mode == Identification.SINGLE:
+                maze_current = maze_arr[0]
+            else:
+                # In dual mode, you'll need to handle maze_left and maze_right
+                maze_left = maze_arr[0]
+                maze_right = maze_arr[1]
+                
+            needs_update = False
 
         # Draw Results Overlay if active
         if show_data_overlay:
@@ -687,12 +701,9 @@ def generate_random_maze_button():
 
 def sample_button(filename):
     global maze_mode, maze_current
-    
-    # Update the current selection
     maze_mode = Identification.SAMPLE
-    
-    # Load the actual data using your generator module
-    # Assuming load_maze_from_file returns a Maze object or grid data
+    # If load_maze_from_file returns a 2D list (grid_data) 
+    # instead of a Maze object, this will crash the solver.
     maze_current = maze_generator.load_maze_from_file(filename)
 
 def data_runs_button():
@@ -700,7 +711,6 @@ def data_runs_button():
 
 def export_data_button():
     print("EXPORT")
-
 
 
 if __name__ == '__main__':
