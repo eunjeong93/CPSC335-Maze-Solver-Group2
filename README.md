@@ -22,7 +22,7 @@ This project is a Python GUI application that solves a maze using Breadth-First 
 1. Make sure Python 3 is installed.
 2. Open the project folder in a terminal.
 3. Run the GUI file with:
-   python gui.py
+   python gui_runner.py
 
 ### Notes
 - BFS is implemented using a queue and is designed to find the shortest path in number of steps when a path exists.

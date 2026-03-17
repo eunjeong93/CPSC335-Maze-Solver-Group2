@@ -222,13 +222,13 @@ path_length = 0
 final_visited = []
 runtime = 0
 total_visited = []
-
+show_result = False
 
 def gui_setup():
     '''
     Description: Runs the setup and the program.
     '''
-    global needs_update, maze_current
+    global needs_update, maze_current, display_prev_runs
     clock = pygame.time.Clock()
     running = True
     button_arr = load_buttons()
@@ -286,11 +286,17 @@ def gui_setup():
             maze_arr.append(maze_current)
             needs_update = False
 
+        if show_result:
+            result_arr = load_result_of_single_run()
+            for res in result_arr:
+                res.display()
+
         # Draw Results Overlay if active
         if show_data_overlay:
             # Draw a background box for readability
             pygame.draw.rect(screen, white, (820, 240, 350, 350))
             pygame.draw.rect(screen, blue, (820, 240, 350, 350), 2)
+            results_text_objects = load_results_for_display()
             for text_obj in results_text_objects:
                 text_obj.display()
 
@@ -333,13 +339,13 @@ def load_buttons():
     # side_split = Button(830, WINDOW_SIZE[1] - 170, button_width, button_height, "DUAL", blue, light_purple, side_split_button, Identification.SIDE_SPLIT)
     # single = Button(830, WINDOW_SIZE[1] - 100, button_width, button_height, "   SINGLE", blue, light_purple, single_screen_button, Identification.SIDE_SPLIT)
 
-    data_run = Button(1000, WINDOW_SIZE[1] - 170, button_width, button_height, "       VIEW RUNS", blue, light_purple, data_runs_button, Identification.VIEW_DATA)
-    # exp_run = Button(1000, WINDOW_SIZE[1] - 100, button_width, button_height, "   EXPORT", blue, light_purple, export_data_button, Identification.EXPORT)
+    # data_run = Button(1000, WINDOW_SIZE[1] - 170, button_width, button_height, "       VIEW RUNS", blue, light_purple, data_runs_button, Identification.VIEW_DATA)
+    # # exp_run = Button(1000, WINDOW_SIZE[1] - 100, button_width, button_height, "   EXPORT", blue, light_purple, export_data_button, Identification.EXPORT)
 
     # sample_maze = Button(30, 10, med_button_width, med_button_height, "     SAMPLE", blue, light_purple, load_sample_maze_buttons, Identification.SAMPLE)
     # gen_maze = Button(30, 60, med_button_width, med_button_height, "     RANDOM", blue, light_purple, generate_random_maze_button, Identification.RANDOM)
 
-    button_arr = [bfs_but, dfs_but, run_but, data_run]
+    button_arr = [bfs_but, dfs_but, run_but]
 
     return button_arr
 
@@ -355,9 +361,9 @@ def load_text_into_screen():
     # maze_size_text = Text(450, WINDOW_SIZE[1] - 200, "MAZE SIZE", Identification.MISCELLANEOUS)
     solver_text = Text(682, WINDOW_SIZE[1] - 200, "SOLVER", Identification.MISCELLANEOUS)
     # comparison_text = Text(825, WINDOW_SIZE[1] - 200, "COMPARISON", Identification.MISCELLANEOUS)
-    data_manager_text = Text(1035, WINDOW_SIZE[1] - 200, "DATA", Identification.MISCELLANEOUS)
+    # data_manager_text = Text(1035, WINDOW_SIZE[1] - 200, "DATA", Identification.MISCELLANEOUS)
 
-    text_arr = [algo_text, solver_text, data_manager_text]
+    text_arr = [algo_text, solver_text]
 
     return text_arr
 
@@ -369,7 +375,7 @@ def load_variable_text_into_screen():
         - SPEED MULTIPLIER
         - MAZE SIZE X
         - MAZE SIZE Y
-        - RUNTIME
+        - RUN DATA
     '''
     # speed_mult = Text(255, WINDOW_SIZE[1] - 90, str(time_scale) + "X", Identification.SPEED_TEXT)
     # maze_size_x = Text(530, WINDOW_SIZE[1] - 150, str(x_maze_size - 1), Identification.MAZE_SIZE_X)
@@ -387,16 +393,11 @@ def load_variable_text_into_screen():
     algo_dual_left = Text(300, 40, algo_left, Identification.MAZE_LEFT)
     algo_dual_right = Text(800, 40, algo_right, Identification.MAZE_RIGHT)
 
-    runtime_text = Text(500, WINDOW_SIZE[1] - 100, "Runtime: " + str(round(runtime)) + " seconds", Identification.MISCELLANEOUS)
-
     if algo_mode == Identification.SINGLE:
         var_text_arr.append(algo_single)
     else:
         var_text_arr.append(algo_dual_left)
         var_text_arr.append(algo_dual_right)
-
-    if needs_update:
-        var_text_arr.append(runtime_text)
 
     return var_text_arr
     
@@ -449,7 +450,6 @@ def load_sample_maze_buttons():
     
     for i in range(0, len(maze_names)):
         filename = sample_maze_list[i]
-        print(maze_names[i])
 
         sample_maze_button = Button(
             30, 60 * (i + 2), 100, 40, 
@@ -460,6 +460,24 @@ def load_sample_maze_buttons():
         maze_processed.append(sample_maze_button)
 
     return maze_processed
+
+def load_result_of_single_run():
+    '''
+    Description: Loads the data of the current run after solving.
+    '''
+    global path_length, total_visited, path
+
+    total_visited_count = 0
+    for i in range(len(total_visited)):
+        for j in range(len(total_visited[i])):
+            if total_visited[i][j] == True:
+                total_visited_count += 1
+
+    runtime_text = Text(WINDOW_SIZE[0] - 350, 200, "Runtime: " + str(round(runtime, 7)) + " seconds", Identification.MISCELLANEOUS)
+    path_length_text = Text(WINDOW_SIZE[0] - 350, 250, "Path Length: " + str(len(path)), Identification.MISCELLANEOUS)
+    visited_cells = Text(WINDOW_SIZE[0] - 350, 300, "Visited Cells: " + str(total_visited_count), Identification.MISCELLANEOUS)
+                         
+    return [runtime_text, path_length_text, visited_cells]
 
 def load_results_for_display():
     '''
@@ -497,11 +515,6 @@ def load_results_for_display():
         
     return display_data
 
-def data_runs_button():
-    global show_data_overlay, results_text_objects
-    show_data_overlay = not show_data_overlay # Toggle
-    if show_data_overlay:
-        results_text_objects = load_results_for_display()
 
 # Algorithms Selection
 def bfs_button():
@@ -510,6 +523,7 @@ def bfs_button():
     if algo_current == Identification.BFS: return
 
     algo_current = Identification.BFS
+    show_result = False
 
 def dfs_button():
     global algo_current
@@ -517,6 +531,7 @@ def dfs_button():
     if algo_current == Identification.DFS: return
 
     algo_current = Identification.DFS
+    show_result = False
 
 # Maze Size Selection
 def set_x_inc_button():
@@ -551,7 +566,7 @@ def set_y_dec_button():
 def solve_button():
     global maze_current, x_maze_size, y_maze_size, needs_update
     global maze_x_offset, maze_y_offset, maze_raw
-    global result, path, path_length, final_visited, runtime
+    global result, path, path_length, final_visited, runtime, show_result, total_visited
 
     start, end = (0, 0), (0, 0)
     for i in range(len(maze_raw)):
@@ -573,14 +588,6 @@ def solve_button():
     num_undiscovered = 0
     
     cell_arr = []
-
-    print("Result of Search: " + str(result))
-    print("Path from S to E:" + str(path))
-    print("Path Length: " + str(path_length))
-    print("Final Visited: " + str(final_visited))
-    print("Total Runtime: " + str(runtime) + " seconds.")
-    print("Total Visited: " + str(len(total_visited)))
-
 
     # Map Result to Cell Values
 
@@ -618,6 +625,7 @@ def solve_button():
     maze_current = Maze(maze_x_offset, maze_y_offset, len(maze_raw[0]), len(maze_raw), maze_id)
     maze_current.cells = cell_arr
     needs_update = True
+    show_result = True
 
 def pause_button():
     global is_paused
@@ -705,7 +713,7 @@ def generate_random_maze_button():
 
 def sample_button(filename):
     global maze_current, x_maze_size, y_maze_size, needs_update
-    global maze_x_offset, maze_y_offset, maze_raw
+    global maze_x_offset, maze_y_offset, maze_raw, show_result
 
     maze_mode = Identification.SAMPLE
     # If load_maze_from_file returns a 2D list (grid_data) 
@@ -756,12 +764,15 @@ def sample_button(filename):
     maze_current = Maze(maze_x_offset, maze_y_offset, len(maze_raw[0]), len(maze_raw), maze_id)
     maze_current.cells = cell_arr
     needs_update = True
+    show_result = False
 
 def data_runs_button():
-    print("VIEW DATA")
+    global show_data_overlay
+
+    show_data_overlay = not show_data_overlay
 
 def export_data_button():
-    print("EXPORT")
+    pass
 
 
 if __name__ == '__main__':
