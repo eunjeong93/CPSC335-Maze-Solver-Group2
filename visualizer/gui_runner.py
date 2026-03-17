@@ -133,6 +133,12 @@ class Maze:
         # Persistent storage for Cell objects
         self.cells = []
         self.generate_empty_grid()
+    
+    def __len__(self):
+        return len(self.cells)
+    
+    def __getitem__(self, index):
+        return self.cells[index]
 
     def generate_empty_grid(self):
         self.cells = []
@@ -265,10 +271,11 @@ def gui_setup():
             for _ in range(int(time_scale)):
                 for solver in active_solvers:
                     try:
-                        # generator yields: (Type, (row, col))
                         update_type, (r, c) = next(solver)
-                        
-                        # Convert (row, col) to 1D index: (row * width + col)
+
+                        if update_type == "VISIT":
+                            target_cell.state = States.DISCOVERED_PATH
+
                         idx = r * x_maze_size + c
                         target_cell = maze_current.cells[idx]
 
