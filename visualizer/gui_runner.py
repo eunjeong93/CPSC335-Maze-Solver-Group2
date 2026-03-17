@@ -201,7 +201,7 @@ maximum_maze_window = 400
 algo_current = Identification.BFS
 algo_mode = Identification.SINGLE
 maze_current = Maze(WINDOW_SIZE[0], WINDOW_SIZE[1], x_maze_size, y_maze_size, Identification.BFS)
-maze_raw = 0
+maze_raw = []
 maze_mode = Identification.RANDOM
 sample_maze_list = []
 sample_current = "maze1"
@@ -568,6 +568,8 @@ def solve_button():
     global maze_x_offset, maze_y_offset, maze_raw
     global result, path, path_length, final_visited, runtime, show_result, total_visited
 
+    if len(maze_raw) == 0: return
+    
     start, end = (0, 0), (0, 0)
     for i in range(len(maze_raw)):
         for j in range(len(maze_raw[i])):
