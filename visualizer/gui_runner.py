@@ -556,8 +556,8 @@ def solve_button():
     start, end = (0, 0), (0, 0)
     for i in range(len(maze_raw)):
         for j in range(len(maze_raw[i])):
-            if maze_raw[i][j] == 'S': start = (j, i)
-            if maze_raw[i][j] == 'E': end = (j, i)
+            if maze_raw[i][j] == 'S': start = (i, j)
+            if maze_raw[i][j] == 'E': end = (i, j)
 
     # Load data to searching algorithms
     if algo_current == Identification.BFS:
