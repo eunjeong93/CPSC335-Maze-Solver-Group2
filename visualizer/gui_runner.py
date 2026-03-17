@@ -369,6 +369,7 @@ def load_variable_text_into_screen():
         - SPEED MULTIPLIER
         - MAZE SIZE X
         - MAZE SIZE Y
+        - RUNTIME
     '''
     # speed_mult = Text(255, WINDOW_SIZE[1] - 90, str(time_scale) + "X", Identification.SPEED_TEXT)
     # maze_size_x = Text(530, WINDOW_SIZE[1] - 150, str(x_maze_size - 1), Identification.MAZE_SIZE_X)
@@ -386,11 +387,16 @@ def load_variable_text_into_screen():
     algo_dual_left = Text(300, 40, algo_left, Identification.MAZE_LEFT)
     algo_dual_right = Text(800, 40, algo_right, Identification.MAZE_RIGHT)
 
+    runtime_text = Text(500, WINDOW_SIZE[1] - 100, "Runtime: " + str(round(runtime)) + " seconds", Identification.MISCELLANEOUS)
+
     if algo_mode == Identification.SINGLE:
         var_text_arr.append(algo_single)
     else:
         var_text_arr.append(algo_dual_left)
         var_text_arr.append(algo_dual_right)
+
+    if needs_update:
+        var_text_arr.append(runtime_text)
 
     return var_text_arr
     
