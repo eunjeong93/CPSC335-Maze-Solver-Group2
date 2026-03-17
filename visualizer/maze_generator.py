@@ -4,15 +4,17 @@ import gui_runner
 
 # *** Maze Generator ***
 # Import this file to generate a random maze.
+# DO NOT USE except for opening the sample mazes
 
 def generate_random_maze(maze_obj):
-    # 1. Start everything as a WALL
+    # 1. Fill everything with WALLs first
     for cell in maze_obj.cells:
         cell.state = gui_runner.States.WALL
 
     stack = []
+    # Start at 0,0
     start_cell = maze_obj.cells[0]
-    start_cell.state = gui_runner.States.START
+    start_cell.state = gui_runner.States.UNDISCOVERED_PATH
     stack.append(start_cell)
 
     while stack:
@@ -21,7 +23,8 @@ def generate_random_maze(maze_obj):
 
         if neighbors:
             next_cell = random.choice(neighbors)
-            # Pass the cell list and width specifically
+            
+            # This carves the path through the wall between cells
             remove_wall(current, next_cell, maze_obj.cells, maze_obj.maze_size_x)
             
             next_cell.state = gui_runner.States.UNDISCOVERED_PATH
@@ -29,7 +32,8 @@ def generate_random_maze(maze_obj):
         else:
             stack.pop()
 
-    # Final touch: ensure start and end are correct
+    # 2. Final touch: Define Start and End explicitly
+    # Use index 0 and the very last cell
     maze_obj.cells[0].state = gui_runner.States.START
     maze_obj.cells[-1].state = gui_runner.States.END
 
