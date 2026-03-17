@@ -24,18 +24,6 @@ This project is a Python GUI application that solves a maze using Breadth-First 
 3. Run the GUI file with:
    python gui.py
 
-### Project Files
-- BFS_maze.py : BFS maze solving logic
-- DFS_maze.py : DFS maze solving logic
-- gui.py : GUI and visualization -> need to revise later
-- sample_mazes/ or .txt maze files : sample maze inputs used for testing
-
-### Maze Format
-- S = Start
-- E = Exit
-- # = Wall
-- . = Open path
-
 ### Notes
 - BFS is implemented using a queue and is designed to find the shortest path in number of steps when a path exists.
 - DFS is implemented to correctly find a path when one exists, though the path may not be the shortest.
