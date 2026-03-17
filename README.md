@@ -27,3 +27,12 @@ This project is a Python GUI application that solves a maze using Breadth-First 
 ### Notes
 - BFS is implemented using a queue and is designed to find the shortest path in number of steps when a path exists.
 - DFS is implemented to correctly find a path when one exists, though the path may not be the shortest.
+
+### Tools and Documentation Used
+- Pygame
+- Gemini AI (to assist)
+- StackOverflow
+- Python Documentation
+- Pygame Documentation
+- GeeksForGeeks
+- Google
